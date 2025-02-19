@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Encontro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+        body {
+            background-color: #1b1b1b;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #e91e63;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #scratch-area {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            background: #c0c0c0;
+            cursor: pointer;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #waves {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(to top, #001f3f, #000);
+            animation: waves 3s infinite alternate ease-in-out;
+        }
+        @keyframes waves {
+            0% { transform: translateY(5px); }
+            100% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="page1">
+        <h2>Tenho um convite especial...</h2>
+        <div id="scratch-area">
+            <canvas id="scratchCanvas"></canvas>
+            <div id="message" class="hidden">
+                <h3>Que tal reviver o nosso primeiro encontro?</h3>
+                <button class="btn" onclick="nextPage(2)">Me conta mais</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container hidden" id="page2">
+        <p>Naquela noite, eu tava ansiosa, curiosa e animada. Você entrou naquele carro tão cheirosa e eu já queria te dar um beijo ali mesmo, acho que naquele dia, alguma coisa minha já pertencia a ti.</p>
+        <button class="btn" onclick="nextPage(3)">Próximo</button>
+    </div>
+
+    <div class="container hidden" id="page3">
+        <div id="waves"></div>
+        <p>De frente pro mar, ouvia as ondas sussurrando que já era amor...</p>
+        <button class="btn" onclick="nextPage(4)">Próximo</button>
+    </div>
+
+    <div class="container hidden" id="page4">
+        <p>E se eu dissesse que quero reviver tudo isso de novo?<br>Mesmo frio na barriga, mesmo brilho nos olhos. Mesmo nós dois.</p>
+        <button class="btn" onclick="nextPage(5)">Próximo</button>
+    </div>
+
+    <div class="container hidden" id="page5">
+        <p>Te convido pra um reencontro<br>Um déjà vu do nosso começo, mas com ainda mais amor.</p>
+        <button class="btn" onclick="nextPage(6)">Próximo</button>
+    </div>
+
+    <div class="container hidden" id="page6">
+        <p>Me diz a vibe que você tá hoje e o local deixa comigo!</p>
+        <button class="btn" onclick="sendWhatsApp(1)">🍕 Pizza</button>
+        <button class="btn" onclick="sendWhatsApp(2)">🍔 Hambúrguer</button>
+        <button class="btn" onclick="sendWhatsApp(3)">🍹 Barzinho/Comidinha</button>
+    </div>
+
+    <div class="container hidden" id="page7">
+        <p>Te busco na sexta, às 20:00, esteja pronta! Eu te amo ❤️</p>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        function nextPage(page) {
+            document.getElementById("page" + currentPage).classList.add("hidden");
+            document.getElementById("page" + page).classList.remove("hidden");
+            currentPage = page;
+        }
+
+        function sendWhatsApp(choice) {
+            let message = "";
+            if (choice === 1) message = "Hoje eu tô na vibe de uma pizza!";
+            if (choice === 2) message = "Tô afim de um hambúrguer!";
+            if (choice === 3) message = "Quero um barzinho/comidinha!";
+            let whatsappLink = "https://wa.me/22988273010" + encodeURIComponent(message);
+            window.location.href = whatsappLink;
+            nextPage(7);
+        }
+
+        // Configuração da raspadinha
+        window.onload = function() {
+            let canvas = document.getElementById("scratchCanvas");
+            let ctx = canvas.getContext("2d");
+            let scratchArea = document.getElementById("scratch-area");
+            let message = document.getElementById("message");
+
+            canvas.width = scratchArea.offsetWidth;
+            canvas.height = scratchArea.offsetHeight;
+
+            ctx.fillStyle = "#c0c0c0";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let isScratching = false;
+            canvas.addEventListener("mousedown", function() { isScratching = true; });
+            canvas.addEventListener("mouseup", function() { isScratching = false; });
+            canvas.addEventListener("mousemove", function(e) {
+                if (!isScratching) return;
+                let x = e.offsetX;
+                let y = e.offsetY;
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                ctx.arc(x, y, 15, 0, 2 * Math.PI);
+                ctx.fill();
+                checkScratch();
+            });
+
+            function checkScratch() {
+                let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let pixels = imageData.data;
+                let scratchedPixels = pixels.filter((_, index) => index % 4 === 3 && pixels[index] === 0).length;
+                let totalPixels = pixels.length / 4;
+                if (scratchedPixels / totalPixels > 0.5) {
+                    canvas.style.display = "none";
+                    message.classList.remove("hidden");
+                }
+            }
+        };
+    </script>
+
+</body>
+</html>
